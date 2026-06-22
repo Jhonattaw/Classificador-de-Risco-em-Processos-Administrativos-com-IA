@@ -1,6 +1,6 @@
-# Solução de apoio à decisão para priorização automática de processos administrativos utilizando Inteligência Artificial Generativa
+# Classificador de Risco em Processos Administrativos com IA
 
-Solução baseada em Inteligência Artificial para classificação automática de risco em processos administrativos. A ferramenta reduz o esforço manual de análise, aumenta a padronização das avaliações e reduz o tempo de triagem de horas para minutos, com baixo custo operacional.
+Projeto desenvolvido para automatizar a classificação de risco de processos administrativos. Em vez de analisar linha por linha manualmente, o sistema lê uma planilha, analisa cada processo e retorna o nível de risco (Alto, Médio ou Baixo) com a justificativa. O objetivo é reduzir o tempo gasto em triagem manual e permitir que o analista foque nos casos mais críticos
 
 ## O que o projeto faz
 
