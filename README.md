@@ -1,6 +1,6 @@
 # Solução de apoio à decisão para priorização automática de processos administrativos utilizando Inteligência Artificial Generativa
 
-Sistema que lê uma planilha com processos administrativos e usa inteligência artificial para classificar automaticamente o nível de risco de cada um como Alto, Médio ou Baixo.
+Solução baseada em Inteligência Artificial para classificação automática de risco em processos administrativos. A ferramenta reduz o esforço manual de análise, aumenta a padronização das avaliações e reduz o tempo de triagem de horas para minutos, com baixo custo operacional.
 
 ## O que o projeto faz
 
@@ -13,7 +13,7 @@ Sistema que lê uma planilha com processos administrativos e usa inteligência a
 
 - Python
 - Pandas
-- Groq API (LLM llama-3.3-70b-versatile)
+- Groq API (openai/gpt-oss-120b)
 - OpenPyXL
 
 ## Como usar
