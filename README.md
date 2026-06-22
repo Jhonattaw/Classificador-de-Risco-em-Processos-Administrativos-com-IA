@@ -9,12 +9,16 @@ Projeto desenvolvido para automatizar a classificação de risco de processos ad
 - Recebe a classificação de risco e a justificativa
 - Salva o resultado em uma nova planilha Excel
 
-## Tecnologias utilizadas
+## Como funciona
 
-- Python
-- Pandas
-- Groq API (openai/gpt-oss-120b)
-- OpenPyXL
+É como uma linha de montagem: o Pandas lê os dados da planilha, 
+envia cada processo para a IA analisar, e o resultado é salvo 
+em uma nova planilha Excel.
+
+- **Python** — linguagem principal
+- **Pandas** — lê e organiza os dados da planilha de entrada
+- **Groq API** — processa cada processo com IA e retorna a classificação
+- **OpenPyXL** — salva o resultado em uma nova planilha Excel
 
 ## Como usar
 
