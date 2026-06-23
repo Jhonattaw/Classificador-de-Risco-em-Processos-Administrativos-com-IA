@@ -9,7 +9,7 @@ import unicodedata
 load_dotenv()
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
-
+# Antes do loop — fixo, não muda a cada processo
 SYSTEM_PROMPT = """
 Você é um auditor especialista em gestão de riscos administrativos.
 Sua função é triar processos para que a equipe humana foque nos casos mais críticos.
@@ -19,6 +19,7 @@ Classifique o nível de risco considerando o contexto e o impacto descrito:
 Alto: impacto imediato e grave — acesso indevido, vazamento, invasão, serviço crítico parado, prejuízo financeiro relevante ou risco legal iminente.
 Médio: requer atenção em prazo curto — pode escalar para Alto se não tratado, situação recorrente ou pendência relevante.
 Baixo: rotineiro e controlável — solicitação comum ou erro isolado sem impacto operacional.
+REVISAR: use quando o caso estiver genuinamente na fronteira entre dois níveis e exigir julgamento humano.
 
 EXEMPLOS:
 
@@ -33,9 +34,14 @@ Descrição: Contribuinte efetuou dois pagamentos da mesma guia e solicita devol
 Resposta: {"risco": "Baixo", "justificativa": "Situação rotineira sem impacto operacional, tratamento simples e controlável."}
 
 Responda APENAS com JSON válido, sem markdown, sem texto adicional:
-{"risco": "Alto, Medio ou Baixo", "justificativa": "uma frase curta"}
+{"risco": "Alto, Medio, Baixo ou REVISAR", "justificativa": "uma frase curta"}
 """
 
+def normalizar(texto):
+    texto = str(texto).strip().lower()
+    texto = unicodedata.normalize("NFD", texto)
+    texto = "".join(c for c in texto if unicodedata.category(c) != "Mn")
+    return texto
 
 def classificar_processo(dados_processo, max_tentativas=3):
     for tentativa in range(max_tentativas):
@@ -64,8 +70,7 @@ def classificar_processo(dados_processo, max_tentativas=3):
     return {"risco": "Indefinido", "justificativa": "Falha após múltiplas tentativas"}
 
 
-
-df = pd.read_excel("processos.xlsx")
+df = pd.read_excel("gabarito_30.xlsx")
 resultados = []
 
 for index, row in df.iterrows():
@@ -76,19 +81,52 @@ for index, row in df.iterrows():
     risco = resultado.get("risco", "Indefinido")
     justificativa = resultado.get("justificativa", "Sem justificativa")
 
+    if normalizar(risco) == "revisar":
+        acertou = "Revisar"
+    elif normalizar(risco) == normalizar(str(row["Risco_Esperado"])):
+        acertou = "Sim"
+    else:
+        acertou = "Não"
+
     resultados.append({
         "ID": row["ID"],
         "Processo": row["Processo"],
         "Descricao": row["Descricao"],
         "Area": row["Area"],
-        "Risco": risco,
-        "Justificativa": justificativa,
+        "Risco_Esperado": row["Risco_Esperado"],
+        "Risco_IA": risco,
+        "Justificativa_IA": justificativa,
+        "Acertou": acertou,
     })
 
-    print(f"✓ {row['ID']} classificado como {risco}")
+    if acertou == "Sim":
+        marca = "✓"
+    elif acertou == "Revisar":
+        marca = "⚠"
+    else:
+        marca = "✗"
+
+    print(f"{marca} {row['ID']} | Esperado: {row['Risco_Esperado']} | IA: {risco}")
     time.sleep(1)
 
 df_resultado = pd.DataFrame(resultados)
-df_resultado.to_excel("resultado_classificacao.xlsx", index=False)
-print("\nArquivo salvo: resultado_classificacao.xlsx")
-print(df_resultado[["ID", "Processo", "Risco", "Justificativa"]])
+
+total = len(df_resultado)
+acertos = df_resultado[df_resultado["Acertou"] == "Sim"].shape[0]
+erros = df_resultado[df_resultado["Acertou"] == "Não"].shape[0]
+revisar = df_resultado[df_resultado["Acertou"] == "Revisar"].shape[0]
+
+classificados = acertos + erros
+assertividade = round((acertos / classificados) * 100, 1) if classificados > 0 else 0
+
+print(f"\n{'='*50}")
+print(f"Total de processos: {total}")
+print(f"Classificados com confiança: {classificados}")
+print(f"  - Acertos: {acertos}")
+print(f"  - Erros: {erros}")
+print(f"Enviados para revisão humana: {revisar}")
+print(f"\nAssertividade nos classificados: {assertividade}%")
+print(f"{'='*50}")
+
+df_resultado.to_excel("gabarito_30_resultado.xlsx", index=False)
+print("Arquivo salvo: gabarito_30_resultado.xlsx")

@@ -1,24 +1,32 @@
 # Classificador de Risco em Processos Administrativos com IA
 
-Projeto desenvolvido para automatizar a classificação de risco de processos administrativos. Em vez de analisar linha por linha manualmente, o sistema lê uma planilha, analisa cada processo e retorna o nível de risco (Alto, Médio ou Baixo) com a justificativa. O objetivo é reduzir o tempo gasto em triagem manual e permitir que o analista foque nos casos mais críticos
-
-## O que o projeto faz
-
-- Lê um arquivo Excel com processos administrativos
-- Envia cada processo para um modelo de linguagem (LLM) via API
-- Recebe a classificação de risco e a justificativa
-- Salva o resultado em uma nova planilha Excel
+Desenvolvi esse projeto para automatizar a triagem de processos 
+administrativos por nível de risco. Em vez de analisar centenas 
+de registros um por um, o sistema lê uma planilha, analisa cada 
+processo e retorna se o risco é Alto, Médio ou Baixo com uma 
+justificativa. O analista para de ler tudo e passa a focar onde 
+o risco é maior.
 
 ## Como funciona
 
-É como uma linha de montagem: o Pandas lê os dados da planilha, 
-envia cada processo para a IA analisar, e o resultado é salvo 
-em uma nova planilha Excel.
+O Pandas lê os dados da planilha e envia cada processo para um 
+modelo de linguagem via API. O modelo analisa o contexto, 
+classifica o risco e devolve a justificativa. O resultado é 
+salvo automaticamente em uma nova planilha Excel.
 
-- **Python** — linguagem principal
-- **Pandas** — lê e organiza os dados da planilha de entrada
-- **Groq API** — processa cada processo com IA e retorna a classificação
-- **OpenPyXL** — salva o resultado em uma nova planilha Excel
+A escolha foi usar LLM via API em vez de machine learning 
+tradicional. O problema envolve interpretação de contexto e 
+critérios subjetivos de risco, o que torna essa abordagem mais 
+ágil para um MVP, sem precisar de uma base histórica grande 
+para treinar.
+
+## Stack
+
+- Python
+- Pandas
+- Groq API (modelo openai/gpt-oss-120b)
+- OpenPyXL
+- python-dotenv
 
 ## Como usar
 
@@ -29,16 +37,35 @@ em uma nova planilha Excel.
 5. Execute: `python classificador.py`
 6. O resultado será salvo em `resultado_classificacao.xlsx`
 
+## Validação
+
+Para medir se o classificador funciona, criei uma base separada 
+de 30 processos com a resposta esperada definida antes de rodar 
+(o gabarito). Rodei o classificador nesses 30, comparei com o 
+gabarito e medi o resultado.
+
+**27 acertos em 30 casos. 90% de concordância.**
+
+As 3 divergências foram todas adjacentes (Médio classificado 
+como Alto ou vice-versa). Nenhuma divergência crítica entre 
+extremos (Alto classificado como Baixo ou o contrário).
+
+## Sobre a base de dados
+
+Os processos usados nesse projeto são fictícios, gerados para 
+demonstração e validação do classificador. A distribuição de 
+risco não representa uma operação real. Em produção, o esperado 
+é que a maioria dos processos seja de baixo risco, com menor 
+incidência de casos críticos. As regras de classificação são 
+configuráveis no prompt conforme a necessidade de cada operação.
+
 ## Exemplo de saída
 
 | ID | Processo | Risco | Justificativa |
 |---|---|---|---|
-| P001 | Atraso em entrega de documentos | Alto | Pode gerar multas e penalidades |
-| P003 | Pagamento em duplicidade | Baixo | Erro facilmente identificável |
-
-## Aplicações práticas
-
-Este sistema pode ser adaptado para triagem de ocorrências fiscais, priorização de processos em órgãos públicos e classificação de demandas em qualquer área administrativa.
+| P001 | Sistema legado sem atualização de segurança | Alto | Servidor com CVE crítico expõe o ambiente a ataques sem mitigação |
+| P004 | Acesso de usuário desligado ainda ativo | Alto | Credencial ativa permite acesso não autorizado e risco de vazamento |
+| P029 | Divergência entre estoque e sistema | Baixo | Diferença isolada sem impacto operacional, tratamento simples |
 
 ## Autor
 
